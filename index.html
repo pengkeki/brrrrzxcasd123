@@ -1,16 +1,298 @@
-<!DOCTYPE html>
+
 <html>
   <head>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
+    <script>
+      const showInfo = () => {
+        let y = 0;
+        const profileButton = document.querySelector("#profile-button");
+        const webButton = document.querySelector("#web-button");
+        const emailButton = document.querySelector("#email-button");
+        const locationButton = document.querySelector("#location-button");
+        const text = document.querySelector("#text");
+
+        profileButton.setAttribute("visible", true);
+        setTimeout(() => {
+          webButton.setAttribute("visible", true);
+        }, 300);
+        setTimeout(() => {
+          emailButton.setAttribute("visible", true);
+        }, 600);
+        setTimeout(() => {
+          locationButton.setAttribute("visible", true);
+        }, 900);
+
+        let currentTab = '';
+        webButton.addEventListener('click', function (evt) {
+          text.setAttribute("value", "https://softmind.tech");
+          currentTab = 'web';
+        });
+        emailButton.addEventListener('click', function (evt) {
+          text.setAttribute("value", "hello@softmind.tech");
+          currentTab = 'email';
+        });
+        profileButton.addEventListener('click', function (evt) {
+          text.setAttribute("value", "AR, VR solutions and consultation");
+          currentTab = 'profile';
+        });
+        locationButton.addEventListener('click', function (evt) {
+          console.log("loc");
+          text.setAttribute("value", "Vancouver, Canada | Hong Kong");
+          currentTab = 'location';
+        });
+
+        text.addEventListener('click', function (evt) {
+          if (currentTab === 'web') {
+            window.location.href="https://softmind.tech";
+          }
+        });
+      }
+
+      const showPortfolio = (done) => {
+        const portfolio = document.querySelector("#portfolio-panel");
+        const portfolioLeftButton = document.querySelector("#portfolio-left-button");
+        const portfolioRightButton = document.querySelector("#portfolio-right-button");
+        const paintandquestPreviewButton = document.querySelector("#paintandquest-preview-button");
+
+        let y = 0;
+        let currentItem = 0;
+
+        portfolio.setAttribute("visible", true);
+
+        const showPortfolioItem = (item) => {
+          for (let i = 0; i <= 2; i++) {
+            document.querySelector("#portfolio-item" + i).setAttribute("visible", i === item);
+          }
+        }
+        const id = setInterval(() => {
+          y += 0.008;
+          if (y >= 0.6) {
+            clearInterval(id);
+            portfolioLeftButton.setAttribute("visible", true);
+            portfolioRightButton.setAttribute("visible", true);
+            portfolioLeftButton.addEventListener('click', () => {
+              currentItem = (currentItem + 1) % 3;
+              showPortfolioItem(currentItem);
+            });
+            portfolioRightButton.addEventListener('click', () => {
+              currentItem = (currentItem - 1 + 3) % 3;
+              showPortfolioItem(currentItem);
+            });
+
+            paintandquestPreviewButton.addEventListener('click', () => {
+              paintandquestPreviewButton.setAttribute("visible", false);
+              const testVideo = document.createElement( "video" );
+              const canplayWebm = testVideo.canPlayType( 'video/webm; codecs="vp8, vorbis"' );
+              if (canplayWebm == "") {
+                document.querySelector("#paintandquest-video-link").setAttribute("src", "#paintandquest-video-mp4");
+                document.querySelector("#paintandquest-video-mp4").play();
+              } else {
+                document.querySelector("#paintandquest-video-link").setAttribute("src", "#paintandquest-video-webm");
+                document.querySelector("#paintandquest-video-webm").play();
+              }
+            });
+
+            setTimeout(() => {
+              done();
+            }, 500);
+          }
+          portfolio.setAttribute("position", "0 " + y + " -0.01");
+        }, 10);
+      }
+
+      const showAvatar = (onDone) => {
+        const avatar = document.querySelector("#avatar");
+        let z = -0.3;
+        const id = setInterval(() => {
+          z += 0.008;
+          if (z >= 0.3) {
+            clearInterval(id);
+            onDone();
+          }
+          avatar.setAttribute("position", "0 -0.25 " + z);
+        }, 10);
+      }
+
+      AFRAME.registerComponent('mytarget', {
+        init: function () {
+          this.el.addEventListener('targetFound', event => {
+            console.log("target found");
+            showAvatar(() => {
+              setTimeout(() => {
+                showPortfolio(() => {
+                  setTimeout(() => {
+                    showInfo();
+                  }, 300);
+                });
+              }, 300);
+            });
+          });
+          this.el.addEventListener('targetLost', event => {
+            console.log("target found");
+          });
+          //this.el.emit('targetFound');
+        }
+      });
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+      }
+      .example-container {
+        overflow: hidden;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+     
+      #example-scanning-overlay {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background: transparent;
+	z-index: 2;
+      }
+      @media (min-aspect-ratio: 1/1) {
+	#example-scanning-overlay .inner {
+	  width: 50vh;
+	  height: 50vh;
+	}
+      }
+      @media (max-aspect-ratio: 1/1) {
+	#example-scanning-overlay .inner {
+	  width: 80vw;
+	  height: 80vw;
+	}
+      }
+
+      #example-scanning-overlay .inner {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+
+	background:
+	  linear-gradient(to right, white 10px, transparent 10px) 0 0,
+	  linear-gradient(to right, white 10px, transparent 10px) 0 100%,
+	  linear-gradient(to left, white 10px, transparent 10px) 100% 0,
+	  linear-gradient(to left, white 10px, transparent 10px) 100% 100%,
+	  linear-gradient(to bottom, white 10px, transparent 10px) 0 0,
+	  linear-gradient(to bottom, white 10px, transparent 10px) 100% 0,
+	  linear-gradient(to top, white 10px, transparent 10px) 0 100%,
+	  linear-gradient(to top, white 10px, transparent 10px) 100% 100%;
+	background-repeat: no-repeat;
+	background-size: 40px 40px;
+      }
+
+      #example-scanning-overlay.hidden {
+	display: none;
+      }
+
+      #example-scanning-overlay img {
+	opacity: 0.6;
+	width: 90%;
+	align-self: center;
+      }
+
+      #example-scanning-overlay .inner .scanline {
+	position: absolute;
+	width: 100%;
+	height: 10px;
+	background: white;
+	animation: move 2s linear infinite;
+      }
+      @keyframes move {
+	0%, 100% { top: 0% }
+	50% { top: calc(100% - 10px) }
+      }
+    </style>
   </head>
-  <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs>
-      <!-- Add a marker-based AR content -->
-      <a-marker preset="hiro">
-        <a-image src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEhUTExIWFhUXGRcaGBgYGRcXGhoXFxcWGhgZGBsYHSggGBolGxgXIzEhJiktLjAuGB8zODMtNygtLisBCgoKDg0OGhAQGi0dICUuLS0tLS0tLS0rLS0tLSstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIAMIBAwMBIgACEQEDEQH/xAAcAAEAAQUBAQAAAAAAAAAAAAAABAIDBQYHAQj/xABBEAABAwIEAwQIBAQFAwUAAAABAAIRAyEEEjFBBVFhBiJxgRMykaGxwdHwByNC4VJicvEUM6KywkODkiQ0U2OC/8QAGAEBAAMBAAAAAAAAAAAAAAAAAAECAwT/xAAgEQEAAwADAAIDAQAAAAAAAAAAAQIRAyExEhMyQVFh/9oADAMBAAIRAxEAPwDhqIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgK4aDg0PIOUmAeqzPYzs6/HYltISG6vdyb9TouufiNwKi3hlSlTY1voAx7IAtlIafa0lUm/eLxTY1wZERXUEREBERAREQEREBERAREQEREBERAREQEREBT+EcKq4h+Sm0uMSY5KAutdiOHCjhKbgO/VGdx3iSGjwge9UvbI6X46/Ke3POI9msVRBc6kco1Ih0eMaLEL6Dw1EOH91oHbrsgADWoNhwkvYN27uaOY3A11WdeWdyzS3F1tXO0RFuwEREBegLxbV2S7PGpXpNdq4gxybzPU2Hmq2tFY1atZtOOqfhJwD/DYT0rx36vePMDYez4qR27q/8AosWTb8oi/UgeO62ikwNYGjQABa/20whqYGu0RcN1tYOB5HlyWNf9bzD5xRXalAhxbqRy+9FSWgamfD6rocyhF6SvEBERAREQEREBERAREQEREBERAREQEREBdr4B/wCzw4/+lnwXFF2TsVihVwVIzdg9G6+hYbD/AMS0+ay5fIb8Hstl4dDQJBJ93kr2Pw2dubKQZtuZ+ixmErOkgSI5X9yzVGuSNXnygfFYT23zHEu2fZw0Xuq02/lEiQP0OO39JOns2WrLs3aTuPjKDms5pAgg6ghatWwVBjg9tJpB21I52NjvdaU5MjJY34u9hpTMDVIkU3HfQ/ZUzAcBr1HAZC0c3WAXQZP8RDI9eBDST3Q4bXI9qhy99QU5vBkkCARJ21tN+hVvstKPrqhUuzdCg3MfzX7E+qI5DfbVbD2FeG1HVDGYkNg/wjlzJJ/0rHeiqw9uXvQC0/21Bg3Uzg2V+V+U5gTIaQNNeous7bPrSMjx1ekcwkFa92+q02YGsaolpDQBpJzNiNeWqn4Ku0tawyLTyB8Vd4vwtmJoPo1P8t4idwQbEeaRKZjp8x4iqCTlGVs2b9TuqG0ydAT5KbxXDOoVX0iIcxzml3MtJEgnQb25hQXvJ1JPiupxvTSduCPG3xVCIgIiICIiAiIgIiICIiAiIgIiICIiAiIgLoP4TYsZ69Fx7rmtcOQcJHlIPuC58ts/DhhOIcdshB8SRHvWfL+EteH84dJrh7ScoBOxifjZUO4vk7r6084l0HX9IHsnyVfHa0NaxumUeG11juE8GzAl4c4FxILYkTrA38L7LlrOw7bL7qJrHMw5xeAbA266KFX4K1s3kx6ovroR4Rp8VnKVEUe6wzOsiNrSPmobmxJJMgE28ZtzsPephnMag1KHdIJbEeqf4jlGY+yR5q1wXAH0bCO+5r8x5ugGI6dFPc0OLqmWTB10dEwQRo6/nPMXdnmsxNIsBcwtvbVrgAB7/ir6zS8dwPOBUZJADwIMFrhcAdJAt1K8o4YF7m0xlewMNS1nBzddpM/PotxwWFd6IZ4zGMxGhOmYcp3ChM4Lke6oDchotOjbCRv+6jRY4Nig9vOBBG4i/wA1maTwBDTN9Pv7stbwHC3UsZWeAQw0yY2zHX3lX6D3sec7g2YgEx5e4dES5d+KWAy1s8HeTa5JnbS22vRaGu7fiNwY4rD5qYGdtyI1H7LhlWmWkg6hdFJ2HPyRkqERFdQREQEREBERAREQEREBERAREQEREBEUrAYCpWcG02lxPISgj06ZcQAJJ0C7B2E7MmhQNR4/MqDbZuo807F/hsaYFbEATYtbAnxPJb3iKJaLcvkuTm5N6h18PHncuacVfWNTLTzPjwtzBsAtmwuKNOk1rm3dy+nzChZJMafeqoxRMtAiB7Tf33VI8xdkvSTYDbWQddlG4m8jKG6gaRY/VUUnRBNhz18unsVzHYwMYC27zZjbQT7NOZSEyhYD0pfOUgQL9Zvabez95uA4W+lijWYe6+c40uYmPEiei5xj8fiH1YNVwJMNDSWySbQAZuecrZOy/aGvTIFZxfTnKS7VpOhJ3bPNazSYhjFol1/B4gOaAVMwYvlPl4LAYaroRoVl8DWuD4KkLTCN254mMDg6tZoBeSG05uM79CeYABMdFx7sxnxOIBrH0jiC9r3es4tOgO1/JdX/ABa4a6vgO6RLKjH3sIhzDc6euuQcAY/DVfSEhzgCKdJpzOLnREBuy2iIZ66tJq0i6k4flkhzXAmQL87S0g+a+f8AtVhvR4usyIAeY8DcLtvZ+nUo0Mj71qpc94F8uZsNafAALj/4gMf/AI6sXNIl5ieQsNzFo+iji9OXxriIi3YCIiAiIgIiICIiAiIgIiICIiApOAwNSs7JTaXHp81m+z/ZZ1YekqnJT2/id4WsOq27B0qdIGnRZlGnUnYk7rK/LEdQ1pxTPcsFwrsKSR6Z8X9Vl7dSRbyldf7LdmMPh2g06YB5m596xXZfhRJD3iI0nb3reKbQNFhN7T63ita+LjlDxICk1HKFXKpK0NSxVLK522v3ZYhr3Ag6X3/fxWx8abEkCbLT8VSdVfABgJVNkbH8UqueWUQ2Dq8j4Qb3WbZg5oBzCX1WEOgwCQPWa0eEwsdR4dkm02+9VZw9erTf+W4jf9o0Kuo1jF8Oqufnpd8AyCLFpBmHDVrgVMLfRUXMe4OqviQLxGgtv9FtjK1GsZr4djn6E5QHeMhZvhvBMKRmp0WjrAWnzUinaN2JxxfQDXHvMtPMbfTyW04eoQ4LH4bhrKTe4IvPvlSmPVGjY3UhXoOpP0cPnPyWAxHAG0GzRoM9If1NAv1J1WT4RjRMLOxoVbNUmZq0jA8PdTBqVOUyRERJm+sa3Xz92n4h6bFVqjSYc4mdJE2nqvoP8ZcYaXDnBmYOqEM7okkGSR0FtV8308C88vLvH2Mkhacdc7ZXtqKV6ApjsC4f9OoepaWj78wo1UOBgiOi1ZLaIiAiIgIiICIiAiIgrpUnOMNBJ6An4LK4Ps7WcZcAxvMkX8BqVtXCeHMoWpgufpnP7bLKjhRJl5Enbdc9ub+OivD/AFqDOzlOPWcT7PkpeH4AxsENva7jN+gW10cE3RxgjWw9xMXV2pSAaQBofWmLg6xH3HRU+yWn1xDDP9JHfJ0sZIvysjWVB6rjIHPeFkcw/VMTaRcWsPFWn1BBy2HObn9tLKqVOGx+IYfXJ6FbjwPtL+l5vvPyWh1NSRz+fPzXtGrefd70w12JuJDhKsYirqtG4Hx9zIbUkt57j6rahXDwHMMjpoqymEbFGdVj2NY2QRrup9V07XVnJmsbHZVWY6s8NJETPJYyuxjr5DPMW/us+cKNx5qO9oFoCvCksfw/BuJu0MbNtyeU8lu2DblaAtfwT73WbpPnkpQv1RKwXG+INo5ZnvG0BZSrVj9Q+9FFe9ru65sjqFKYnJQeH8WLoLCDeLGbronCKxLAXLnlXg7KTmvpGA57ZHI8x7FvGCxMNA2AVqR20571tSIrDHfiNhzUwVXK1pe24LiW5ebgQ1142hfO/EqdXLmc+qWcwW16Y/7jXR7brr34m9pKLqYoZ6jQXAmpTdlykGBebw4t1tcSRLZ5NxHE1abx6V2bN6mJYO85v8xs4m4kSHCZM2neriswJpN/+RvscP8AivDQjV7faT8AsniMSCJq0WPaf+pTkajmNXbw+T0UX/Bsf/lVL/wPsfIizj7FZRCeANDP31VKuvoOBIIuNRv7NVbLTyUoeIiICIiAiIgIiIOqf4qBNNgzEXzWEee6rwNUxnfd0RqcoBP6Wjed1YL2jK5wzFwAYLXudCdtbnkrWXO4Oe4gE+q0kDKN3Hl0XHjt1NoMbMCpmk3m48puAr9WkAO8XNaMummY6STfn4WUSpWZMincC9ulj5DQaqVXrgtBAywG+taI1I8VAYfDjZ7n7xy93TWUxRLTlqN7hnLve0gzEaqrDcVpklobU2BIbDbjx0sdBKqpOJdBLTBzWmdLzMzYe7ZBEq4TKTEmNfLSemih1KUXI56RG2yyeV7gHXMmLWAB0nlt0srNQhw0DSNerj49FKEEVCNev7LMcI4k6m6Qe6dW7dfArFV6P7bbKvCvjdJgh0MND2h7LghWX0JuFj+zOOykNce473LZsRhcveGh1+qpMLaxDXGId7VZq0M2gWUqUZVDcOdlMIYcYRwOk9FNwrHtFwTOn397rN4bC3WUo4ccleI1SZxq4pk2IAO/397q05rGG5zHl9+K3Z1BoBJA5rjnaftsaeJeGNbka5ukaAmQfERY+1Xiivzb5QoZ+8+A0bbeK5r+InbUlxo4aoQwNguadXeXQghavxbtxisQ0gvLW27o0Nna+cLXalYEHrceOpHtn2laVpnrO198bDwziJql2HcZzS6lJtnIP5Z/ldLm9JtciMXSxzqBdTI9JQfB9G/Qi8EH9FRskS3Qgi4kLFteQQQSCNCLERcQstxd3pWirEZu/wBO8ctQDkBUGYDlVV8U1axGFLB6Wg8upnU7t5sqDQ7dDbmoprsd6zIPNnd9ouPYAvcBjXUnSLg2c06OHX67K7i6dMjO2cp3EWPJw2PUWI8wA8zhwgnOBztUaBy1kfyyfLVRatKLgy3Yj4Hkei8yHYg+B+yvWVCD46g6HxClC2ivFgd6uv8AD9Ofx8VZQEREBERAREQdEqgsAjXnrlbcFvuUmlReWB5B1BymwynlzPuUV9g3NBDs0gHlu7wMBSqWKOWxkmwk6Dl0sD7AuR1rge+oSG5YHOdzYHSbX9qyWNwjBkYXOfYk7gm2gsAOnTVYkPFMQyTt1LnEX9sq63DPqvLhqACbCJJAgbCL9ZChKTSxdOS25NrM0DrwJNh4e3VSnYYG9gYuJMHca6b26KG6q2m0MZbS/Mm2bx1VfpXejygmL3vAnQKEqalBzTZ0+F9Ndfj5K3UqSTnveZ6qZR4e+Q46RMbHz30PtKtvoyZeJb3hAMZcu5vfVShQ6nbNaJkfDnMKyKI1B7sq66iZlt5ixnTw2H7qt9IiCBIMz8fYpHmFrkHXXxv7lvnBuNsLclUgH5GwXP6T763nb5cvJU42rla0wQ5s3HU20RDqNagQQRovaTLrFdiOLGsx1N5BLYynctK2GrhCLhR8cNX8M1TKVOFFwruanRZaVZyxHajijaGHc4uAJBDZ0mCfkV8ydocaHVXwwMMwQDLbTdvIdNNF2D8V+IZXtZJiAIIlt3DNPI5ZXDMQDMnfX+oWM9d/Na1hnaVqV4iK6gsrw5wNP0Z/U58dDlYPZcHxYOSxSvh0Nb/U74MsgsKulVLTbwIOhHIq7jh3yf4u9POdffKjoL1SmIzN03G7fqOqsqpjiDI1VZh2ljy28uX34ILSrc+ddef1VJEarxAREQEREBERBvlVwdGUcmj3/RX8LW9G0QeZNovuDuLWULBAiSZmIG15Klvl4LLDNBceQlpOi5cdS5hszn+kLstpja4t53/0rYMPDaQG5N9iQ0DUjQajzWJp1Gh8QO6LRvYgaqVUxFnN/TBLjucpEDwkH3qJWhMpYQQC2AQXFzrdQAOkEe1XcNpcWBuBGojTSwsouHqSwiYAEgRqep6A+3wVVGscgAAa8mx/l1AbKriWTrVczBcFsG1uskxtpfqoTBJgxDpPI2OsG2g+5Uak+xa2Dki/T6mR5r2jL2iIkDmZtIN4TDV+vSBIcGOnYN1toeqodVB7pt5RH7KRVa6mG5IBE3I52ymdCojMM8zUJAB5H9XkZ8kFFfAuaM4dIPgIPmrOJeHNIJg9IF1l8Jgy0G8gagwdtb7aqJxDgUnOyGkCSBN+anTHnZPGOoYhkkhrzDiYjS3W/wAuq7HQIcyVwgUX57AtMyJ229i3zgXaN7fy3NJdaN/PorxLOYb22jCrWOwPEy6zmlpPP6qTicSA0nkCrQpOuBfifxEHFu7xjMQQdhEGPInfktFxoIe6f1X8948DIWb7cVC6sTPMEdZMe74LB1HZmA7tsfDY/L+61r4zn1GREVlRVudYDl8ZPyj2KhEF2Zb1b8D9D/uVpV0nQemh8DqvHtgwgpREQVB+xuPvTkvD0XiICIiAiIgIiIN4xFNwb/NI8tDPWyuYLuglx7rrHziVEqY3vd6Q4RbbRXjW9I3MBebxpBIA9/xXPMOmJTKTQCTMC89Lq+O4WyNSRe+szPlHvWPawvaL6QCN9h9FkmVszW5hcbf/AJE/FVxOo9WscuUm7jcxq3eOkfFZWv3mggyWtaBeDYa28CVicPXznOYAEAdBMjyOhK8/xEZm0h6xmeUbe4qcNZPC0TDjMAQepHrX8PkpmCxORkxDiST4OiCFh3443EwfdOxEaaKqvjiYki8At2get4DVRidZyg8uu51/WseZ0P3uq8TmykhgjXlbw8vesI5ps0DaxFjEgR4396lYdxFi47nWIB0v1VcTrIYDiAveBpqdRpqpL6rgJZ3tLE+4LF0sKwgOk35W1UoUCLMJLTpvvrHLX3pMGpzix8ZmkEnunTUK3jC6nlcJDtDBtH31VuO7lcCCDYnbXmPFVtDslzmA5zP7olu3B65dTBPJYvtnxT0dFwBjNby5TsveD8UpmnqBGuy0n8SOLy0gEFvI7/MH70la1jWNpxzbi+NL6pDzmHq5tyJlpMakLHsOR0HTQ9QeXxHkqCZHh8FUHSIO2h+R6Ldgpe2DCpVTiqUBERAVTnSqUQEREBERAREQEREBERBuPE9Wfe694UbO8kRYfpv+0nhzjNS/6h/tWSxBsz+k/BEUJYmsIpW5H4lTcBb2j5oiC2R3meamOH+X/Q7/AJfQIihKbh3Gdd6n+0H4qvCCS6b/ANyiKFkRhuPD/kFOwjjmInn8ERQMjj9f/H4BWKFQ59ToN0RIS9qn8vyd8VzztG8lhkn7IRFrxsuRrCIi2YCIiAiIgIiICIiAiIgIiICIiAiIg//Z" width="2" height="2"></a-image>
-      </a-marker>
-      <a-entity camera></a-entity>
-    </a-scene>
+  <body>
+    <div class="example-container">
+      <div id="example-scanning-overlay" class="hidden">
+	<div class="inner">
+	  <!-- <img src="./card.png"/> -->
+	  <div class="scanline"></div>
+	</div>
+      </div>
+
+      <a-scene mindar-image="imageTargetSrc: ./assets/targets.mind; showStats: false; uiScanning: #example-scanning-overlay;" embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        <a-assets>
+          <img id="card" src="./assets/card.jpg" />
+          <img id="icon-web" src="./assets/web.png" />
+          <img id="icon-location" src="./assets/location.png" />
+          <img id="icon-profile" src="./assets/profile.png" />
+          <img id="icon-phone" src="./assets/phone.png" />
+          <img id="icon-email" src="./assets/email.png" />
+          <img id="icon-play" src="./assets/play.png" />
+          <img id="icon-left" src="./assets/left.png" />
+          <img id="icon-right" src="./assets/right.png" />
+          <img id="paintandquest-preview" src="./assets/church.jpg" />
+          <video id="paintandquest-video-mp4" autoplay="false" loop="true" src="./assets/card-example/portfolio/paintandquest.mp4"></video>
+          <video id="paintandquest-video-webm" autoplay="false" loop="true" src="./assets/card-example/portfolio/paintandquest.webm"></video>
+          <img id="coffeemachine-preview" src="./assets/card-example/portfolio/coffeemachine-preview.png" />
+          <img id="peak-preview" src="./assets/card-example/portfolio/peak-preview.png" />
+          
+          <a-asset-item id="avatarModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/softmind/scene.gltf"></a-asset-item>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects: .clickable">
+        </a-camera>
+
+        <a-entity id="mytarget" mytarget mindar-image-target="targetIndex: 0">
+          <a-plane src="#card" position="0 0 0" height="0.552" width="1" rotation="0 0 0"></a-plane>
+
+          <a-entity visible=false id="portfolio-panel" position="0 0 -0.01">
+            <a-text value="Portfolio" color="black" align="center" width="2" position="0 0.4 0"></a-text>
+            <a-entity id="portfolio-item0">
+              <a-video id="paintandquest-video-link" webkit-playsinline playsinline width="1" height="0.552" position="0 0 0"></a-video>
+              <a-image id="paintandquest-preview-button" class="clickable" src="#paintandquest-preview" alpha-test="0.5" position="0 0 0" height="0.552" width="1">
+              </a-image>
+            </a-entity>
+            <a-entity id="portfolio-item1" visible=false>
+              <a-image class="clickable" src="#coffeemachine-preview" alpha-test="0.5" position="0 0 0" height="0.552" width="1">
+              </a-image>
+            </a-entity>
+            <a-entity id="portfolio-item2" visible=false>
+              <a-image class="clickable" src="#peak-preview" alpha-test="0.5" position="0 0 0" height="0.552" width="1">
+              </a-image>
+            </a-entity>
+
+            <a-image visible=false id="portfolio-left-button" class="clickable" src="#icon-left" position="-0.7 0 0" height="0.15" width="0.15"></a-image>
+            <a-image visible=false id="portfolio-right-button" class="clickable" src="#icon-right" position="0.7 0 0" height="0.15" width="0.15"></a-image>
+          </a-entity>
+
+          <a-image visible=false id="profile-button" class="clickable" src="#icon-profile" position="-0.42 -0.5 0" height="0.15" width="0.15"
+            animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate"
+          ></a-image>
+
+          <a-image visible=false id="web-button" class="clickable" src="#icon-web" alpha-test="0.5" position="-0.14 -0.5 0" height="0.15" width="0.15"
+            animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate"
+          ></a-image>
+
+          <a-image visible=false id="email-button" class="clickable" src="#icon-email"  position="0.14 -0.5 0" height="0.15" width="0.15"
+            animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate"
+          ></a-image>
+
+          <a-image visible=false id="location-button" class="clickable" src="#icon-location" position="0.42 -0.5 0" height="0.15" width="0.15"
+            animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate"
+          ></a-image>
+
+          <a-gltf-model id="avatar" rotation="0 0 0" position="0 -0.25 0" scale="0.004 0.004 0.004" src="#avatarModel"></a-gltf-model>
+
+          <a-text id="text" class="clickable" value="" color="black" align="center" width="2" position="0 -1 0" geometry="primitive:plane; height: 0.1; width: 2;" material="opacity: 0.5"></a-text>
+        </a-entity>
+      </a-scene>
+    </div>
   </body>
 </html>
